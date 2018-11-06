@@ -3,6 +3,7 @@ package com.udacity.gradle.builditbigger;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -38,6 +39,7 @@ public class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, St
     protected void onPreExecute() {
         super.onPreExecute();
         if (mProgressBar != null) {
+            Log.d("myTag", "inside onpre execute");
             mProgressBar.setVisibility(View.VISIBLE);
         }
     }
@@ -59,6 +61,7 @@ public class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, St
         String name = pairs[0].second;
 
         try {
+            Log.d("myTag", "get data from joke library");
             return myApiService.sayHi(name).execute().getData();
         } catch (IOException e) {
             return e.getMessage();
@@ -70,7 +73,7 @@ public class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, St
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         this.result = result;
-
+        Log.d("myTag", result);
         // Setting the interstitial ad
         mInterstitialAd = new InterstitialAd(context);
         mInterstitialAd.setAdUnitId(context.getString(R.string.interstitial_ad_unit_id));
@@ -78,6 +81,7 @@ public class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, St
             @Override
             public void onAdLoaded() {
                 super.onAdLoaded();
+                Log.d("myTag", "inter add loaded");
                 if (mProgressBar != null) {
                     mProgressBar.setVisibility(View.GONE);
                 }
@@ -92,6 +96,7 @@ public class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, St
             @Override
             public void onAdFailedToLoad(int i) {
                 super.onAdFailedToLoad(i);
+                Log.d("myTag", "inter add load failed "+ i);
                 if (mProgressBar != null) {
                     mProgressBar.setVisibility(View.GONE);
                 }

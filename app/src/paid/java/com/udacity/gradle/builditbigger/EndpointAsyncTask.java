@@ -61,7 +61,7 @@ class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, String> {
             MyApi.Builder builder = new MyApi.Builder(
                     AndroidHttp.newCompatibleTransport()
                     , new AndroidJsonFactory(), null
-            ).setRootUrl("http://10.0.2.2:8080/_ah/api/")
+            ).setRootUrl(context.getString(R.string.root_url_api))
                     .setGoogleClientRequestInitializer(
                             new GoogleClientRequestInitializer() {
                                 @Override
