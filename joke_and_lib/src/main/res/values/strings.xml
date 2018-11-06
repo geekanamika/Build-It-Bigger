@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">joke_and_lib</string>
-    <string name="key_joke">joke_key</string>
+    <string name="key_joke_pass">joke_key</string>
 </resources>

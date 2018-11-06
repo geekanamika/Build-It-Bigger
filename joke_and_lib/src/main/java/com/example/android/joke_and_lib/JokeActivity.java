@@ -28,7 +28,7 @@ public class JokeActivity extends AppCompatActivity {
             Bundle data = intent.getExtras();
             if (data != null) {
                 // set values on text and images
-                String joke = data.getString(getString(R.string.key_joke));
+                String joke = data.getString(getString(R.string.key_joke_pass));
                 tv_joke.setText(joke);
             }
 
