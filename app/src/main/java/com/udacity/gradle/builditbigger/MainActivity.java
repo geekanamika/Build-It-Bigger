@@ -39,9 +39,9 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void tellJoke(View view) {
-        Toast.makeText(this, "derp", Toast.LENGTH_SHORT).show();
-    }
+//    public void tellJoke(View view) {
+//        Toast.makeText(this, "derp", Toast.LENGTH_SHORT).show();
+//    }
 
 
 }
