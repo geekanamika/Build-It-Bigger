@@ -42,27 +42,32 @@ public class MainActivityFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         initAddMob(view);
+        final ProgressBar progressBar = view.findViewById(R.id.progressbar);
 
         Button tellJokeButton = view.findViewById(R.id.tellJokeButton);
         tellJokeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                JokeProvider joke = new JokeProvider();
-//                //Toast.makeText(getContext(), joke.getJoke(), Toast.LENGTH_SHORT).show();
-//                Intent intent = new Intent(getActivity(), JokeActivity.class);
-//                //intent.putExtra(getString(R.string.key_joke), joke.getJoke());
-//                startActivity(intent);
-                ProgressBar progressBar = view.findViewById(R.id.progressbar);
-                new EndpointAsyncTask(getActivity(), progressBar ).execute(new Pair<Context, String>(getActivity(), "Random"));
+                new EndpointAsyncTask(getActivity(), new EndpointAsyncTask.ProgressBarUpdate() {
+                    @Override
+                    public void changeProgressBarViewStatus(boolean var) {
+                        if(var){
+                            progressBar.setVisibility(View.VISIBLE);
+                        } else {
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    }
+                }).execute();
             }
         });
     }
 
     private void initAddMob(@NonNull View view) {
-        MobileAds.initialize(getContext(), getString(R.string.add_app_id));
+        //MobileAds.initialize(getContext(), getString(R.string.add_app_id));
 
         AdView mAdView = view.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
                 .build();
         mAdView.loadAd(adRequest);
 

@@ -1,5 +1,6 @@
 package com.udacity.gradle.builditbigger;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -23,33 +24,25 @@ import java.io.IOException;
 /**
  * Created by Anamika Tripathi on 6/11/18.
  */
-public class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, String> {
+public class EndpointAsyncTask extends AsyncTask<Void, Void, String> {
     private static MyApi myApiService = null;
     private InterstitialAd mInterstitialAd;
     private String result;
     private Context context;
-    private ProgressBar mProgressBar;
+    @SuppressLint("StaticFieldLeak")
+    private ProgressBarUpdate progressBarUpdateListener;
 
-    public EndpointAsyncTask(Context context, ProgressBar progressBar) {
-        this.mProgressBar = progressBar;
+    EndpointAsyncTask(Context context, ProgressBarUpdate listener) {
+        this.progressBarUpdateListener = listener;
         this.context = context;
     }
 
     @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-        if (mProgressBar != null) {
-            Log.d("myTag", "inside onpre execute");
-            mProgressBar.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    protected String doInBackground(Pair<Context, String>... pairs) {
+    protected String doInBackground(Void... voids) {
         if (myApiService == null) {
             MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                     new AndroidJsonFactory(), null)
-                    .setRootUrl("http://10.0.2.2:8080/_ah/api/")
+                    .setRootUrl(context.getString(R.string.root_url_api))
                     .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                         @Override
                         public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
@@ -58,15 +51,19 @@ public class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, St
                     });
             myApiService = builder.build();
         }
-        String name = pairs[0].second;
 
         try {
             Log.d("myTag", "get data from joke library");
-            return myApiService.sayHi(name).execute().getData();
+            return myApiService.getJokeFromBackend().execute().getData();
         } catch (IOException e) {
             return e.getMessage();
         }
+    }
 
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        progressBarUpdateListener.changeProgressBarViewStatus(true);
     }
 
     @Override
@@ -77,14 +74,12 @@ public class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, St
         // Setting the interstitial ad
         mInterstitialAd = new InterstitialAd(context);
         mInterstitialAd.setAdUnitId(context.getString(R.string.interstitial_ad_unit_id));
-        mInterstitialAd.setAdListener(new AdListener(){
+        mInterstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
                 super.onAdLoaded();
                 Log.d("myTag", "inter add loaded");
-                if (mProgressBar != null) {
-                    mProgressBar.setVisibility(View.GONE);
-                }
+                progressBarUpdateListener.changeProgressBarViewStatus(false);
                 mInterstitialAd.show();
             }
 
@@ -96,10 +91,8 @@ public class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, St
             @Override
             public void onAdFailedToLoad(int i) {
                 super.onAdFailedToLoad(i);
-                Log.d("myTag", "inter add load failed "+ i);
-                if (mProgressBar != null) {
-                    mProgressBar.setVisibility(View.GONE);
-                }
+                Log.d("myTag", "inter add load failed " + i);
+                progressBarUpdateListener.changeProgressBarViewStatus(false);
                 startJokeDisplayActivity();
             }
         });
@@ -115,6 +108,10 @@ public class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, St
         intent.putExtra(context.getString(R.string.key_joke_pass), result);
         //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+    }
+
+    interface ProgressBarUpdate {
+        void changeProgressBarViewStatus(boolean var);
     }
 
 }
