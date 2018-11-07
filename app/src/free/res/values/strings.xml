@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--<string name="interstitial_ad_unit_id">YOUR_INTERSTITIAL_ID</string>-->
-    <!--<string name="banner_ad_unit_id">YOUR_BANNER_ID</string>-->
-    <!--<string name="add_app_id">YOUR_APP_ID</string>-->
-    <string name="interstitial_ad_unit_id">ca-app-pub-7379275532145892/1843561024</string>
-    <string name="banner_ad_unit_id">ca-app-pub-7379275532145892/6756922456</string>
-    <string name="add_app_id">ca-app-pub-7379275532145892~8476649495</string>
+    <string name="root_url">http://192.168.43.142:8080/_ah/api</string>
 </resources>

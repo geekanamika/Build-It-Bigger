@@ -2,14 +2,9 @@ package com.udacity.gradle.builditbigger;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.util.Pair;
-import android.view.View;
-import android.widget.ProgressBar;
 
-import com.example.android.joke_and_lib.JokeActivity;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
@@ -27,13 +22,11 @@ import java.io.IOException;
 public class EndpointAsyncTask extends AsyncTask<Void, Void, String> {
     private static MyApi myApiService = null;
     private InterstitialAd mInterstitialAd;
-    private String result;
-    private Context context;
-    @SuppressLint("StaticFieldLeak")
-    private ProgressBarUpdate progressBarUpdateListener;
+    private ExecutionListener executionListener;
+    private final Context context;
 
-    EndpointAsyncTask(Context context, ProgressBarUpdate listener) {
-        this.progressBarUpdateListener = listener;
+    EndpointAsyncTask(Context context, ExecutionListener listener) {
+        this.executionListener = listener;
         this.context = context;
     }
 
@@ -42,7 +35,7 @@ public class EndpointAsyncTask extends AsyncTask<Void, Void, String> {
         if (myApiService == null) {
             MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                     new AndroidJsonFactory(), null)
-                    .setRootUrl(context.getString(R.string.root_url_api))
+                    .setRootUrl(Constant.ROOT_URL)
                     .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                         @Override
                         public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
@@ -56,44 +49,43 @@ public class EndpointAsyncTask extends AsyncTask<Void, Void, String> {
             Log.d("myTag", "get data from joke library");
             return myApiService.getJokeFromBackend().execute().getData();
         } catch (IOException e) {
-            return e.getMessage();
+            Log.d("myTag", e.getMessage());
+            return "";
         }
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        progressBarUpdateListener.changeProgressBarViewStatus(true);
+        executionListener.changeProgressBarViewStatus(true);
     }
 
     @Override
-    protected void onPostExecute(String result) {
+    protected void onPostExecute(final String result) {
         super.onPostExecute(result);
-        this.result = result;
-        Log.d("myTag", result);
         // Setting the interstitial ad
         mInterstitialAd = new InterstitialAd(context);
-        mInterstitialAd.setAdUnitId(context.getString(R.string.interstitial_ad_unit_id));
+        mInterstitialAd.setAdUnitId(BuildConfig.Interstitial_ad_unit_id);
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
                 super.onAdLoaded();
                 Log.d("myTag", "inter add loaded");
-                progressBarUpdateListener.changeProgressBarViewStatus(false);
+                executionListener.changeProgressBarViewStatus(false);
                 mInterstitialAd.show();
             }
 
             @Override
             public void onAdClosed() {
-                startJokeDisplayActivity();
+                executionListener.startDisplayActivity(result);
             }
 
             @Override
             public void onAdFailedToLoad(int i) {
                 super.onAdFailedToLoad(i);
                 Log.d("myTag", "inter add load failed " + i);
-                progressBarUpdateListener.changeProgressBarViewStatus(false);
-                startJokeDisplayActivity();
+                executionListener.changeProgressBarViewStatus(false);
+                executionListener.startDisplayActivity(result);
             }
         });
 
@@ -103,15 +95,9 @@ public class EndpointAsyncTask extends AsyncTask<Void, Void, String> {
         mInterstitialAd.loadAd(ar);
     }
 
-    private void startJokeDisplayActivity() {
-        Intent intent = new Intent(context, JokeActivity.class);
-        intent.putExtra(context.getString(R.string.key_joke_pass), result);
-        //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
-    }
-
-    interface ProgressBarUpdate {
+    interface ExecutionListener {
         void changeProgressBarViewStatus(boolean var);
+        void startDisplayActivity(String result);
     }
 
 }

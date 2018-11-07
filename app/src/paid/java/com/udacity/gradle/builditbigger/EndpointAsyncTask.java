@@ -1,14 +1,9 @@
 package com.udacity.gradle.builditbigger;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.util.Pair;
-import android.view.View;
-import android.widget.ProgressBar;
 
-import com.example.android.joke_and_lib.JokeActivity;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
@@ -20,48 +15,32 @@ import java.io.IOException;
 /**
  * Created by Anamika Tripathi on 6/11/18.
  */
-class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, String> {
-    private static MyApi mJokeApi = null;
-    private ProgressBar mProgressBar;
-    private Context context;
+class EndpointAsyncTask extends AsyncTask<Void, Void, String> {
+    private static MyApi myApiService = null;
+    private ExecutionListener listener;
 
-    public EndpointAsyncTask(Context context,ProgressBar mProgressBar) {
-        this.mProgressBar = mProgressBar;
-        this.context = context;
+    EndpointAsyncTask(ExecutionListener listener) {
+        this.listener = listener;
+    }
+
+    interface ExecutionListener {
+        void changeProgressBarViewStatus(boolean var);
+        void startDisplayActivity(String result);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if(mProgressBar!=null) {
-            mProgressBar.setVisibility(View.VISIBLE);
-        }
+        listener.changeProgressBarViewStatus(true);
     }
 
     @Override
-    protected void onPostExecute(String s) {
-        super.onPostExecute(s);
-        if(mProgressBar!=null) {
-            mProgressBar.setVisibility(View.GONE);
-        }
-        Log.d("myTag","joke" + s);
-        startJokeDisplayActivity(s);
-    }
-
-    private void startJokeDisplayActivity(String result) {
-        Intent intent = new Intent(context, JokeActivity.class);
-        intent.putExtra(context.getString(R.string.key_joke_pass), result);
-        //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
-    }
-
-    @Override
-    protected String doInBackground(Pair<Context, String>... pairs) {
-        if(mJokeApi == null) {
+    protected String doInBackground(Void... voids) {
+        if(myApiService == null) {
             MyApi.Builder builder = new MyApi.Builder(
                     AndroidHttp.newCompatibleTransport()
                     , new AndroidJsonFactory(), null
-            ).setRootUrl(context.getString(R.string.root_url_api))
+            ).setRootUrl(Constant.ROOT_URL)
                     .setGoogleClientRequestInitializer(
                             new GoogleClientRequestInitializer() {
                                 @Override
@@ -70,15 +49,22 @@ class EndpointAsyncTask extends AsyncTask<Pair<Context, String>, Void, String> {
                                 }
                             }
                     );
-            mJokeApi = builder.build();
+            myApiService = builder.build();
         }
-        String name = pairs[0].second;
-
         try {
-            return mJokeApi.sayHi(name).execute().getData();
+            return myApiService.getJokeFromBackend().execute().getData();
         } catch (IOException e) {
-            return e.getMessage();
+            Log.d("myTag", e.getMessage());
+            return "";
         }
     }
 
+
+
+    @Override
+    protected void onPostExecute(String s) {
+        super.onPostExecute(s);
+        listener.changeProgressBarViewStatus(false);
+        listener.startDisplayActivity(s);
+    }
 }

@@ -24,7 +24,8 @@ public class JokeActivity extends AppCompatActivity {
 
     private void extractDataFromBundle() {
         Intent intent = getIntent();
-        if (intent != null) {
+        // if intent is not null & it contain the extra key, get the data from bundle
+        if (intent != null && intent.hasExtra(getString(R.string.key_joke_pass))) {
             Bundle data = intent.getExtras();
             if (data != null) {
                 // set values on text and images

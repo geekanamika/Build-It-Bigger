@@ -44,6 +44,10 @@ android {
         free {
             dimension "version"
             applicationId "com.udacity.gradle.builditbigger.free"
+            it.buildConfigField 'String', 'Interstitial_ad_unit_id', Interstitial_ad_unit_id
+            it.resValue 'string', 'banner_ad_unit_id', Banner_ad_unit_id
+            it.buildConfigField 'String', 'Ad_app_id', Ad_app_id
+            it.resValue 'string', 'ad_app_id', Ad_app_id
         }
         paid {
             dimension "version"
