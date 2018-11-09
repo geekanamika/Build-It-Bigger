@@ -1,6 +1,5 @@
 package com.udacity.gradle.builditbigger;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -57,6 +56,7 @@ public class EndpointAsyncTask extends AsyncTask<Void, Void, String> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        EspressoIdlingResource.increment();
         executionListener.changeProgressBarViewStatus(true);
     }
 
@@ -66,6 +66,13 @@ public class EndpointAsyncTask extends AsyncTask<Void, Void, String> {
         // Setting the interstitial ad
         mInterstitialAd = new InterstitialAd(context);
         mInterstitialAd.setAdUnitId(BuildConfig.Interstitial_ad_unit_id);
+        // now that the data has been loaded, we can mark the app as idle
+        // first, make sure the app is still marked as busy then decrement, there might be cases
+        // when other components finished their asynchronous tasks and marked the app as idle
+        if (!EspressoIdlingResource.getIdlingResource().isIdleNow()) {
+            EspressoIdlingResource.decrement(); // Set app as idle.
+        }
+
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {

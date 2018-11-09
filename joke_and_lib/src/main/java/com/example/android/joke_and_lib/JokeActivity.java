@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 public class JokeActivity extends AppCompatActivity {
 
-    TextView tv_joke;
+    private TextView tv_joke;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
