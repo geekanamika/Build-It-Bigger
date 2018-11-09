@@ -16,6 +16,8 @@ import com.example.android.joke_and_lib.JokeActivity;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
 
 
 /**
@@ -24,6 +26,7 @@ import com.google.android.gms.ads.AdView;
 public class MainActivityFragment extends Fragment implements EndpointAsyncTask.ExecutionListener {
 
     private ProgressBar progressBar;
+    private InterstitialAd mInterstitialAd;
 
     public MainActivityFragment() {
     }
@@ -39,6 +42,7 @@ public class MainActivityFragment extends Fragment implements EndpointAsyncTask.
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        MobileAds.initialize(getContext(), BuildConfig.Ad_app_id);
         initAddMob(view);
         progressBar = view.findViewById(R.id.progressbar);
 
@@ -46,13 +50,24 @@ public class MainActivityFragment extends Fragment implements EndpointAsyncTask.
         tellJokeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new EndpointAsyncTask(getActivity(), MainActivityFragment.this).execute();
+                new EndpointAsyncTask(MainActivityFragment.this).execute();
             }
         });
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if(getActivity()!=null) {
+            mInterstitialAd = new InterstitialAd(getActivity());
+            mInterstitialAd.setAdUnitId(BuildConfig.Interstitial_ad_unit_id);
+        }
+
+    }
+
     private void initAddMob(@NonNull View view) {
-        //MobileAds.initialize(getContext(), getString(R.string.add_app_id));
+
 
         AdView mAdView = view.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder()
@@ -105,6 +120,41 @@ public class MainActivityFragment extends Fragment implements EndpointAsyncTask.
 
     @Override
     public void startDisplayActivity(String result) {
+
+        initInterestialAddMob(result);
+    }
+
+    private void initInterestialAddMob(final String result) {
+            mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                Log.d("myTag", "inter add loaded");
+                mInterstitialAd.show();
+            }
+
+            @Override
+            public void onAdClosed() {
+                startJokeDisplayActivity(result);
+            }
+
+            @Override
+            public void onAdFailedToLoad(int i) {
+                super.onAdFailedToLoad(i);
+                Log.d("myTag", "inter add load failed " + i);
+                startJokeDisplayActivity(result);
+            }
+        });
+
+        AdRequest ar = new AdRequest
+                .Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .build();
+        mInterstitialAd.loadAd(ar);
+
+    }
+
+    private void startJokeDisplayActivity(String result) {
         Intent intent = new Intent(getActivity(), JokeActivity.class);
         intent.putExtra(getString(R.string.key_joke_pass), result);
         startActivity(intent);

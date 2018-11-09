@@ -1,6 +1,5 @@
 package com.udacity.gradle.builditbigger;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -55,7 +54,7 @@ class EndpointAsyncTask extends AsyncTask<Void, Void, String> {
             return myApiService.getJokeFromBackend().execute().getData();
         } catch (IOException e) {
             Log.d("myTag", e.getMessage());
-            return e.getMessage();
+            return "";
         }
     }
 

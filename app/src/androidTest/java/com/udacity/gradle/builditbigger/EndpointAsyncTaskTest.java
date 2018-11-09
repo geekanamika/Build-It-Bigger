@@ -1,6 +1,5 @@
 package com.udacity.gradle.builditbigger;
 
-import android.app.Application;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -18,15 +17,14 @@ import static junit.framework.TestCase.assertTrue;
  */
 @RunWith(AndroidJUnit4.class)
 public class EndpointAsyncTaskTest {
-    //Context context;
+    Context context;
 
     @Test
     public void testVerifyJoke() throws InterruptedException {
         assertTrue(true);
         final CountDownLatch latch = new CountDownLatch(1);
-        //context = InstrumentationRegistry.getContext();
-        EndpointAsyncTask testTask = new EndpointAsyncTask(
-                new EndpointAsyncTask.ExecutionListener() {
+        context = InstrumentationRegistry.getContext();
+        EndpointAsyncTask testTask = new EndpointAsyncTask(new EndpointAsyncTask.ExecutionListener() {
             @Override
             public void changeProgressBarViewStatus(boolean var) {
                 // no use here
